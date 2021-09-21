@@ -1,7 +1,7 @@
 import airflow
 from airflow.models import DAG
-from airflow.operator.bash import BashOperator
-from airflow.operator.bash import PythonOperator
+from airflow.operators.bash import BashOperator
+from airflow.operators.python import PythonOperator
 
 def _get_pictures():
     pass
@@ -11,14 +11,15 @@ def _get_pictures():
 
 dag = DAG(
     dag_id="download_rocket_launches",
-    start_date= airflow.utils.dates.day_ago(2),
-    schedule_interval = None
+    start_date= airflow.utils.dates.days_ago(2),
+    schedule_interval = None,
+    tags=['book']
 )
 
 
 download_launches = BashOperator(
     task_id='Download_Launches',
-    command="curl -o /tmp/launches.json -L 'https://ll.thespacedevs.com/2.0.0/launch/upcoming'",
+    bash_command="curl -o /tmp/launches.json -L 'https://ll.thespacedevs.com/2.0.0/launch/upcoming'",
     dag=dag
 )
 
@@ -31,7 +32,7 @@ get_pictures = PythonOperator(
 
 notify = BashOperator(
     task_id='notify',
-    command='echo "There are now $(ls /tmp/images/ | wc -l) images."'
+    bash_command='echo "There are now $(ls /tmp/images/ | wc -l) images."'
 )
 
 download_launches >> get_pictures >> notify
