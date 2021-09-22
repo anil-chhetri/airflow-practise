@@ -3,8 +3,28 @@ from airflow.models import DAG
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
 
+import pathlib
+import json
+import urllib.request as r
+
+
 def _get_pictures():
-    pass
+    
+    # ensure that the direcotry exists 
+    pathlib.Path("/tmp/images").mkdir(parents=True, exist_ok=True)
+
+    #download all the images in json.
+    with open("/tmp/launches.json") as f:
+        lauches = json.load(f)
+        images_urls = [x['image'] for x in lauches['results']]
+        print(images_urls)
+        for image_url in images_urls:
+            filename = image_url.split('/')[-1]
+            filepath = pathlib.Path("/tmp/images").joinpath(filename)
+            # print(filename)
+            r.urlretrieve(image_url, filepath)
+
+
 
 
 
