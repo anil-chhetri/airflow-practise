@@ -9,7 +9,8 @@ dag = DAG(
     dag_id='chapter4_templating',
     start_date=airflow.utils.dates.days_ago(3),
     schedule_interval="@daily",
-    catchup=False
+    catchup=False,
+    tags=['Book', 'BashOperator', 'python operator']
 )
 
 

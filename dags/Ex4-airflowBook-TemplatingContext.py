@@ -7,7 +7,8 @@ from airflow.operators.python import PythonOperator
 dag = DAG(
     dag_id='Print_context',
     start_date = d.days_ago(2),
-    schedule_interval=None    
+    schedule_interval=None,
+    tags=['Book', 'Python Operator']    
 )
 
 
