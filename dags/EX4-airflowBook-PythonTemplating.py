@@ -3,6 +3,7 @@ import airflow.utils.dates as date
 from airflow.models import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
+from airflow.providers.postgres.operators.postgres import PostgresOperator
 
 from urllib import request
 
@@ -12,6 +13,7 @@ dag = DAG(
     start_date= date.days_ago(2),
     schedule_interval=None,
     catchup=False,
+    template_searchpath='/tmp',
     tags=['Book']
 )
 
@@ -111,15 +113,25 @@ extract_gz = BashOperator(
 )
 
 
-def _fetchView(pagenames):
+def _fetchView(pagenames, execution_date):
     result = dict.fromkeys(pagenames,0)
     with open(f"/tmp/wikipages", 'r') as f:  
         for line in f:
-            domainCode, page_title, views_coutns, _ = line.split(" ")
+            domainCode, page_title, view_counts, _ = line.split(" ")
             if domainCode == 'en' and page_title in pagenames:
-                pagenames[page_title] = views_coutns
+                result[page_title] = view_counts
 
     print(pagenames)
+    print(result)
+
+
+    with open(f"/tmp/postgres_query.sql", 'w') as w:
+        for pagename, pagecount in result.items():
+            w.write(
+                "INSERT INTO pageviewscount values ("
+                f"'{pagename}', {pagecount}, '{execution_date}'"
+                f");\n"
+            )
 
 
 
@@ -127,7 +139,7 @@ fetch_pageViews = PythonOperator(
     task_id="fetch_pageviews",
     python_callable= _fetchView ,
     op_kwargs={
-        "pagename" : {
+        "pagenames" : {
             "Google",
             "Amazon",
             "Apple",
@@ -138,4 +150,29 @@ fetch_pageViews = PythonOperator(
     dag=dag
 )
 
-get_data >> extract_gz >> fetch_pageViews
+
+create_table = PostgresOperator(
+    task_id='create_table',
+    database='bookdata',
+    postgres_conn_id='postgres_default',
+    sql='''
+        CREATE TABLE IF NOT EXISTS PageviewsCount(
+            pagename varchar(50) not null,
+            pagecount int not null,
+            datetime timestamp not null
+        );
+    ''',
+    dag=dag
+)
+
+insert_data = PostgresOperator(
+    task_id = 'insert_data',
+    database='bookdata',
+    postgres_conn_id='postgres_default',
+    sql='postgres_query.sql',  # should define the template_searchpath in dag defination.
+    dag=dag
+)
+
+
+#get_data >> extract_gz >> fetch_pageViews
+get_data >> extract_gz >> fetch_pageViews >> create_table >> insert_data
