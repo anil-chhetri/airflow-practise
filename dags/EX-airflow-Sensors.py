@@ -10,10 +10,11 @@ from airflow.operators.python import PythonOperator
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 
 import pathlib as p
+import os
 
 
 
-airflow_root_path = p.Path(configuration.get_airflow_home())
+airflow_root_path = os.environ.get('AIRFLOW_HOME')
 
 
 default_args = {
@@ -26,7 +27,7 @@ with DAG(
     schedule_interval=None,
     default_args=default_args,
     tags=['Book', 'TriggerDagRunOperator']
-) as d:
+) as dag1:
     
 
     '''  
@@ -34,7 +35,7 @@ with DAG(
     '''
     file_sensor = FileSensor(
         task_id = 'FileSensor_single_file',
-        filepath=airflow_root_path / 'include' / 'files' / 'test',
+        filepath=airflow_root_path + '/include' + '/files' + '/test',
         poke_interval=10,
         timeout=500,
         mode='reschedule'
@@ -48,7 +49,7 @@ with DAG(
     '''
     file_sensor_multiple = FileSensor(
         task_id = 'Multiple_files',
-        filepath=airflow_root_path / 'include' / 'files' / '1' / '*.csv',
+        filepath=airflow_root_path + '/include' + '/files' + '/1/' + '*.csv',
         poke_interval = 15,
         timeout = 500,
         mode='reschedule'
@@ -65,15 +66,15 @@ with DAG(
     file_sensor_multiple_condition = PythonSensor(
         task_id = 'multiple_condition',
         python_callable=_check_files,
-        op_kwargs={"path" : airflow_root_path.joinpath('include', 'files', '1') },
+        op_kwargs={"path" : airflow_root_path + '/include/files/1' },
         poke_interval=10,
         timeout = 150
     )
-
+#airflow_root_path.joinpath('include', 'files', '1')
     clean_dag = TriggerDagRunOperator(
         task_id = 'calling_clean_up_dag',
         trigger_dag_id='cleanup'
-    )
+    )   
 
 
     [file_sensor, file_sensor_multiple, file_sensor_multiple_condition] >> clean_dag
@@ -82,6 +83,7 @@ with DAG(
 
 with DAG(
     dag_id='cleanup', 
+    start_date= d.days_ago(1),
     default_args=default_args,
     schedule_interval=None
 
@@ -91,6 +93,6 @@ with DAG(
         pass
 
     deleteFiles = PythonOperator(
-        task_id = 'delete files',
+        task_id = 'deletefiles',
         python_callable=_deleteFiles
     )
