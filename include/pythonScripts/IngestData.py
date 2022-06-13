@@ -8,7 +8,7 @@ def IngestDataToPostgres(filename, tableName, databaseName):
     connection = create_engine(postgres_conn)
     print(filename)
 
-    df_iter = pd.read_csv('yellow_taxi.csv',
+    df_iter = pd.read_csv(filename,
                           chunksize=500000, iterator=True)
     df = next(df_iter)
 
