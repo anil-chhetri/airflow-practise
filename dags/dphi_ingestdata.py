@@ -59,9 +59,11 @@ with pipelineDag as dag:
         op_kwargs= { "filename": file_name, "path": f"{airflow_home}/data/"}
     )
 
-    dummy = DummyOperator( task_id = 'dummy')
 
-    get_data >> dummy >> convert_to_csv
+    get_data >> convert_to_csv
+
+
+
 
     #https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_2019-01.parquet
     #wget http://www.example.com/filename.txt -o /path/filename.txt

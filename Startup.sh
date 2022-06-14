@@ -12,9 +12,5 @@ file="${curpath}/Startup.sh"
 if [ -f "$file" ]; then
     export AIRFLOW_HOME=`pwd`
     echo $AIRFLOW_HOME
-    echo "$AIRFLOW_HOME does not exist."
-
-else 
-    echo "$file does not exist."
-fi
+    echo "$AIRFLOW_HOME exist."
 
