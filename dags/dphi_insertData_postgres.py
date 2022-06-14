@@ -1,16 +1,19 @@
 
+from fileinput import filename
 from pathlib import Path
 
 from airflow import DAG
+import airflow
 from airflow.utils.dates import days_ago
 from airflow.operators.python import PythonOperator
-
+from airflow.operators.bash import BashOperator
 from airflow.sensors.filesystem import FileSensor
 from airflow.decorators import task
 
-from include.pythonScripts import IngestData
+import IngestData
 
 import os
+import shutil
 
 airflow_home = os.environ.get('AIRFLOW_HOME')
 
@@ -30,7 +33,7 @@ postgresIngest = DAG(dag_id='postgresIngest'
 
 with postgresIngest as dag:
 
-    checkFile = FileSensor(task_id = 'checkfile', filepath=f'{airflow_home}/data/*.csv', poke_interval=15, timeout=3)
+    checkFile = FileSensor(task_id = 'checkfile', filepath=f'{airflow_home}/data/*.csv', poke_interval=15, timeout=30)
 
     @task()
     def getFile():
@@ -42,8 +45,9 @@ with postgresIngest as dag:
     def process(filename):
         print("processing file ")
         print(filename)
-        IngestData.IngestDataToPostgres(filename, Path(filename).stem, 'dphi')
-
+        IngestData.IngestDataToPostgres(f'{airflow_home}/data/{filename}', Path(filename).stem, 'dphi')
+        print('moving file')
+        shutil.move(f'{airflow_home}/data/{filename}', f'{airflow_home}/data/Processed/{filename}')
 
     process(getFile()).set_upstream(checkFile)
 

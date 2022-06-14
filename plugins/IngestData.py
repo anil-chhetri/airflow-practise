@@ -4,7 +4,7 @@ from time import time
 
 
 def IngestDataToPostgres(filename, tableName, databaseName):
-    postgres_conn = f"postgresql+psycopg2://postgres:admin@localhost/{databaseName}"
+    postgres_conn = f"postgresql+psycopg2://postgres:postgres@localhost/{databaseName}"
     connection = create_engine(postgres_conn)
     print(filename)
 

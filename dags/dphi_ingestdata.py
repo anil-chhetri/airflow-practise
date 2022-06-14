@@ -11,8 +11,9 @@ import pandas as pd
 
 
 base_url = "https://s3.amazonaws.com/nyc-tlc/trip+data/" 
-file_name = "yellow_tripdata_{{ dag_run.logical_date.strftime('%Y-%m') }}"
-yellow_taxi_url = base_url + file_name + ".parquet"
+yellow_file_name = "yellow_tripdata_{{ dag_run.logical_date.strftime('%Y-%m') }}"
+yellow_taxi_url = base_url + yellow_file_name + ".parquet"
+green_taxi_url = base_url + 
 
 airflow_home =  os.environ.get('AIRFLOW_HOME')
 
@@ -46,17 +47,23 @@ pipelineDag = DAG(dag_id= "pipelineDag"
 
 with pipelineDag as dag:
 
-    get_data = BashOperator(
+    get_data_yellow_taxi = BashOperator(
                   task_id = "get_data"
-                #, bash_command= f"wget {yellow_taxi_url} -O '{airflow_home}/data/{file_name}.parquet'"
-                , bash_command="echo 'test'"
+                , bash_command= f"wget {yellow_taxi_url} -O '{airflow_home}/data/{yellow_file_name}.parquet'"
+                # , bash_command="echo 'test'"
+                )
+
+    get_data_green_taxi = BashOperator(
+                  task_id = "get_data"
+                , bash_command= f"wget {yellow_taxi_url} -O '{airflow_home}/data/{file_name}.parquet'"
+                # , bash_command="echo 'test'"
                 )
 
     convert_to_csv = PythonOperator(
         task_id="convert_to_csv",
         provide_context = True,
         python_callable=convertToCSV,
-        op_kwargs= { "filename": file_name, "path": f"{airflow_home}/data/"}
+        op_kwargs= { "filename": yellow_file_name, "path": f"{airflow_home}/data/"}
     )
 
 
