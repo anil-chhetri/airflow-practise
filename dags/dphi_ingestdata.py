@@ -13,7 +13,7 @@ import pandas as pd
 base_url = "https://s3.amazonaws.com/nyc-tlc/trip+data/" 
 yellow_file_name = "yellow_tripdata_{{ dag_run.logical_date.strftime('%Y-%m') }}"
 yellow_taxi_url = base_url + yellow_file_name + ".parquet"
-green_taxi_url = base_url + 
+# green_taxi_url = base_url + 
 
 airflow_home =  os.environ.get('AIRFLOW_HOME')
 
@@ -53,11 +53,11 @@ with pipelineDag as dag:
                 # , bash_command="echo 'test'"
                 )
 
-    get_data_green_taxi = BashOperator(
-                  task_id = "get_data"
-                , bash_command= f"wget {yellow_taxi_url} -O '{airflow_home}/data/{file_name}.parquet'"
-                # , bash_command="echo 'test'"
-                )
+    # get_data_green_taxi = BashOperator(
+    #               task_id = "get_data"
+    #             , bash_command= f"wget {yellow_taxi_url} -O '{airflow_home}/data/{yellow_file_name}.parquet'"
+    #             # , bash_command="echo 'test'"
+    #             )
 
     convert_to_csv = PythonOperator(
         task_id="convert_to_csv",
@@ -67,7 +67,7 @@ with pipelineDag as dag:
     )
 
 
-    get_data >> convert_to_csv
+    get_data_yellow_taxi >> convert_to_csv
 
 
 

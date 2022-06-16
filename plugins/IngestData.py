@@ -9,7 +9,7 @@ def IngestDataToPostgres(filename, tableName, databaseName):
     print(filename)
 
     df_iter = pd.read_csv(filename,
-                          chunksize=500000, iterator=True)
+                          chunksize=900000, iterator=True)
     df = next(df_iter)
 
     df.tpep_pickup_datetime = pd.to_datetime(df.tpep_pickup_datetime)
