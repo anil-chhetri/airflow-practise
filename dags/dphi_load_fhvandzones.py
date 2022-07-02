@@ -77,8 +77,8 @@ def loadToPostgres(path, tableName, databaseName):
     print('insertion completed.')
 
 
-FHVIngest = DAG(dag_id="FHVIngest", schedule_interval="0 0 1 * *", catchup=True,
-                start_date=datetime(2019, 1, 1), end_date=datetime(2019, 12, 5), tags=["dphi"])
+FHVIngest = DAG(dag_id="FHVIngest", schedule_interval="0 0 1 * *", catchup=True, start_date=datetime(
+    2019, 1, 1), end_date=datetime(2019, 12, 5), concurrency=2, max_active_runs=2, tags=["dphi"])
 
 with FHVIngest as dag:
 
