@@ -24,7 +24,7 @@ default_args = {
 
 AIRFLOW_HOME = os.environ.get('AIRFLOW_HOME')
 path_to_sql = f"{AIRFLOW_HOME}/include/sql/snowflake/initialprep.sql"
-connect_str = "BlobEndpoint=https://dphidatastorage.blob.core.windows.net/;QueueEndpoint=https://dphidatastorage.queue.core.windows.net/;FileEndpoint=https://dphidatastorage.file.core.windows.net/;TableEndpoint=https://dphidatastorage.table.core.windows.net/;SharedAccessSignature=sv=2021-06-08&ss=bfqt&srt=sco&sp=rwdlacupx&se=2022-07-02T20:02:17Z&st=2022-07-02T12:02:17Z&spr=https&sig=NzNSMrPF2XXQ8XZQ2V5Nynp4HOPd9bGEgVo5JrAclEs%3D"
+connect_str = "**secret"
 
 
 def upload_file(local_csv_path):
